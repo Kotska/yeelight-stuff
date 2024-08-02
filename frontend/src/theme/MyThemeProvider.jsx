@@ -37,7 +37,19 @@ export default function MyThemeProvider(props) {
 		[]
 	);
 
-	const _theme = useMemo(() => createTheme(theme[mode]), [mode]);
+	const modifiedTheme = {
+		...theme[mode],
+		components: {
+			MuiButton: {
+				styleOverrides: {
+					root: {
+						borderRadius: "20px", // Customize the border-radius here
+					},
+				},
+			},
+		},
+	};
+	const _theme = useMemo(() => createTheme(modifiedTheme), [mode]);
 	return (
 		<ThemeContext.Provider value={colorMode}>
 			<ThemeProvider theme={_theme}>
