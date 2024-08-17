@@ -2,8 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/oherych/yeelight"
@@ -11,8 +17,8 @@ import (
 
 // App struct
 type App struct {
-	ctx     context.Context
-	devices []Device
+	ctx           context.Context
+	Configuration Configuration
 }
 
 type Device struct {
@@ -24,6 +30,10 @@ type Device struct {
 	Power    bool
 }
 
+type Configuration struct {
+	Devices []Device
+}
+
 // NewApp creates a new App application struct
 func NewApp() *App {
 	return &App{}
@@ -33,6 +43,46 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.setupConfig()
+}
+
+func (a *App) setupConfig() {
+	value, _ := os.UserConfigDir()
+	path := filepath.Join(value, "yeelight-stuff")
+	_ = os.Mkdir(path, 0755)
+	fullPath := filepath.Join(path, "config.json")
+	file, er := os.OpenFile(fullPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+
+	if er != nil {
+		fmt.Println(er)
+	}
+
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	a.Configuration = Configuration{}
+	err := decoder.Decode(&a.Configuration)
+	if err != nil {
+		fmt.Println("error at line 61: ", err)
+	}
+	fmt.Printf("Config: %v", a.Configuration)
+}
+
+func (a *App) updateConfig() {
+	value, _ := os.UserConfigDir()
+	path := filepath.Join(value, "yeelight-stuff")
+	fullPath := filepath.Join(path, "config.json")
+	file, err := os.OpenFile(fullPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	defer file.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	encoder := json.NewEncoder(file)
+	err = encoder.Encode(a.Configuration)
+	if err != nil {
+		fmt.Println("error at line 80: ", err)
+	}
+
 }
 
 func (a *App) NewFullDevice(location string, name string, version string, id string, model string, power bool) Device {
@@ -45,14 +95,25 @@ func (a *App) NewFullDevice(location string, name string, version string, id str
 		Power:    power,
 	}
 
-	for _, d := range a.devices {
-		if d.Location == newDevice.Location || d.Name == newDevice.Name {
+	deviceWithSameName := 0
+
+	for _, d := range a.Configuration.Devices {
+		if d.Location == newDevice.Location {
 			return d
+		}
+
+		if strings.Contains(d.Name, newDevice.Name) {
+			deviceWithSameName++
 		}
 	}
 
-	a.devices = append(a.devices, newDevice)
+	if deviceWithSameName > 0 {
+		newDevice.Name = newDevice.Name + " " + strconv.Itoa(deviceWithSameName)
+	}
 
+	a.Configuration.Devices = append(a.Configuration.Devices, newDevice)
+
+	a.updateConfig()
 	return newDevice
 }
 
@@ -62,19 +123,41 @@ func (a *App) NewBasicDevice(location string, name string) Device {
 		Name:     name,
 	}
 
-	for _, d := range a.devices {
-		if d.Location == newDevice.Location || d.Name == newDevice.Name {
+	deviceWithSameName := 0
+
+	for _, d := range a.Configuration.Devices {
+		if d.Location == newDevice.Location {
 			return d
+		}
+
+		if strings.Contains(d.Name, newDevice.Name) {
+			deviceWithSameName++
 		}
 	}
 
-	a.devices = append(a.devices, newDevice)
+	if deviceWithSameName > 0 {
+		newDevice.Name = newDevice.Name + " " + strconv.Itoa(deviceWithSameName)
+	}
 
+	a.Configuration.Devices = append(a.Configuration.Devices, newDevice)
+
+	a.updateConfig()
 	return newDevice
 }
 
-func (a *App) GetDevices() any {
-	return a.devices
+func (a *App) GetDevices() []Device {
+	fmt.Println(a.Configuration.Devices)
+	return a.Configuration.Devices
+}
+
+func (a *App) DeleteDevice(location string) {
+	for i, d := range a.Configuration.Devices {
+		if d.Location == location {
+			a.Configuration.Devices = append(a.Configuration.Devices[:i], a.Configuration.Devices[i+1:]...)
+			a.updateConfig()
+			return
+		}
+	}
 }
 
 func (a *App) DiscoverBulbs() bool {
