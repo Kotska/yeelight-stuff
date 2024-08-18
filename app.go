@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/oherych/yeelight"
 )
 
@@ -27,6 +27,7 @@ type Device struct {
 	Location string
 	Model    string
 	Name     string
+	Support  []string
 	Power    bool
 }
 
@@ -51,47 +52,48 @@ func (a *App) setupConfig() {
 	path := filepath.Join(value, "yeelight-stuff")
 	_ = os.Mkdir(path, 0755)
 	fullPath := filepath.Join(path, "config.json")
-	file, er := os.OpenFile(fullPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	color.Yellow("Config file path: %v", fullPath)
 
-	if er != nil {
-		fmt.Println(er)
+	file, err := os.OpenFile(fullPath, os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
+		color.Red("Could not load config file:", err)
 	}
-
 	defer file.Close()
+
 	decoder := json.NewDecoder(file)
 	a.Configuration = Configuration{}
-	err := decoder.Decode(&a.Configuration)
+	err = decoder.Decode(&a.Configuration)
 	if err != nil {
-		fmt.Println("error at line 61: ", err)
+		color.Red("Could not decode config:", err)
 	}
-	fmt.Printf("Config: %v", a.Configuration)
 }
 
 func (a *App) updateConfig() {
 	value, _ := os.UserConfigDir()
 	path := filepath.Join(value, "yeelight-stuff")
 	fullPath := filepath.Join(path, "config.json")
-	file, err := os.OpenFile(fullPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-	defer file.Close()
+	file, err := os.OpenFile(fullPath, os.O_WRONLY, 0600)
 	if err != nil {
-		log.Fatal(err)
+		color.Red("Could not update config file: ", err)
 	}
+	defer file.Close()
 
 	encoder := json.NewEncoder(file)
 	err = encoder.Encode(a.Configuration)
 	if err != nil {
-		fmt.Println("error at line 80: ", err)
+		color.Red("Could not encode config: ", err)
 	}
 
 }
 
-func (a *App) NewFullDevice(location string, name string, version string, id string, model string, power bool) Device {
+func (a *App) NewFullDevice(location string, name string, version string, id string, model string, support []string, power bool) Device {
 	newDevice := Device{
 		Version:  version,
 		Id:       id,
 		Location: location,
 		Model:    model,
 		Name:     name,
+		Support:  support,
 		Power:    power,
 	}
 
@@ -146,7 +148,7 @@ func (a *App) NewBasicDevice(location string, name string) Device {
 }
 
 func (a *App) GetDevices() []Device {
-	fmt.Println(a.Configuration.Devices)
+	color.Yellow("", a.Configuration.Devices)
 	return a.Configuration.Devices
 }
 
@@ -170,7 +172,7 @@ func (a *App) DiscoverBulbs() bool {
 	}
 
 	for _, d := range devices {
-		a.NewFullDevice(d.Location, d.Name, d.FirmwareVersion, d.ID, d.Model, d.Power)
+		a.NewFullDevice(d.Location, d.Name, d.FirmwareVersion, d.ID, d.Model, d.Support, d.Power)
 	}
 
 	return true

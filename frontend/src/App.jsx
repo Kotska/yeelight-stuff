@@ -11,6 +11,7 @@ function App() {
 			<main className='content'>
 				<Routes>
 					<Route path='/' element={<Config />} />
+					<Route path='/test' element={<div></div>} />
 				</Routes>
 			</main>
 		</div>

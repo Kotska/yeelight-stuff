@@ -10,4 +10,4 @@ export function GetDevices():Promise<Array<main.Device>>;
 
 export function NewBasicDevice(arg1:string,arg2:string):Promise<main.Device>;
 
-export function NewFullDevice(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:boolean):Promise<main.Device>;
+export function NewFullDevice(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:Array<string>,arg7:boolean):Promise<main.Device>;

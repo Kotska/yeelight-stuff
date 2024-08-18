@@ -94,6 +94,15 @@ const Sidebar = () => {
 							setSelected={setSelected}
 						/>
 					</Box>
+					<Box>
+						<Item
+							title='Test'
+							to='/test'
+							icon={<SettingsOutlinedIcon />}
+							selected={selected}
+							setSelected={setSelected}
+						/>
+					</Box>
 				</Menu>
 			</ProSidebar>
 		</Box>
