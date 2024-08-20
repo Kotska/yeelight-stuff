@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
 	const theme = useTheme();
@@ -96,9 +97,9 @@ const Sidebar = () => {
 					</Box>
 					<Box>
 						<Item
-							title='Test'
-							to='/test'
-							icon={<SettingsOutlinedIcon />}
+							title='Songs'
+							to='/songs'
+							icon={<LibraryMusicIcon />}
 							selected={selected}
 							setSelected={setSelected}
 						/>

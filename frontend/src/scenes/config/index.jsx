@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext } from "react";
 import {
 	Typography,
 	Box,
@@ -13,16 +13,13 @@ import {
 } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SearchIcon from "@mui/icons-material/Search";
-import {
-	DiscoverBulbs,
-	NewBasicDevice,
-	GetDevices,
-	DeleteDevice,
-} from "../../../wailsjs/go/main/App.js";
+import { DiscoverBulbs } from "../../../wailsjs/go/main/App.js";
 import DevicesList from "./DevicesList.jsx";
+import { Context } from "../../Store.jsx";
 
 const Config = () => {
-	const [devices, setDevices] = useState([]);
+	const { devices, newBasicDevice, getDevices, deleteDevice } =
+		useContext(Context);
 	const [discoverLoading, setDiscoverLoading] = useState(false);
 	const [deviceIp, setDeviceIp] = useState("");
 	const [deviceType, setDeviceType] = useState("");
@@ -37,29 +34,11 @@ const Config = () => {
 		});
 	};
 
-	const getDevices = () => {
-		GetDevices().then((result) => {
-			console.log(result);
-			if (result) {
-				setDevices(result);
-			}
-		});
-	};
-
-	const devicesInit = useMemo(getDevices, []);
-
 	const newDevice = (e) => {
 		e.preventDefault();
 		if (e.target.checkValidity() == true) {
-			NewBasicDevice(deviceIp, deviceType).then((result) => {
-				getDevices();
-			});
+			newBasicDevice(deviceIp, deviceType);
 		}
-	};
-
-	const deleteDevice = (location) => {
-		DeleteDevice(location);
-		getDevices();
 	};
 
 	const handleIpChange = (e) => {
@@ -82,23 +61,23 @@ const Config = () => {
 
 	const deviceTypes = [
 		{
-			value: "Lightstrip (Color)",
+			value: "strip",
 			label: "Lightstrip (Color)",
 		},
 		{
-			value: "LED Bulb (Color)",
+			value: "color",
 			label: "LED Bulb (Color)",
 		},
 		{
-			value: "Bedside Lamp (Color)",
+			value: "bslamp",
 			label: "Bedside Lamp (Color)",
 		},
 		{
-			value: "LED Bulb (White)",
+			value: "mono",
 			label: "LED Bulb (White)",
 		},
 		{
-			value: "Ceiling Light",
+			value: "ceiling",
 			label: "Ceiling Light",
 		},
 	];
@@ -118,7 +97,7 @@ const Config = () => {
 						</ListSubheader>
 					}
 				>
-					<DevicesList devices={devices} deleteDevice={deleteDevice} />
+					<DevicesList />
 				</List>
 			</Paper>
 			<LoadingButton

@@ -1,4 +1,4 @@
-import { React, useRef, useState } from "react";
+import { React, useRef, useState, useContext } from "react";
 import { ListItem, ListItemText, Icon, ListItemButton } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -10,6 +10,7 @@ import HelpIcon from "@mui/icons-material/Help";
 import StripIcon from "../../assets/images/strip-icon.svg";
 import useLongPress from "../../hooks/use-long-press";
 import { Menu, MenuItem } from "@mui/material";
+import { Context } from "../../Store";
 
 const DeviceIcon = ({ model }) => {
 	if (model == "color") return <LightbulbIcon />;
@@ -23,7 +24,8 @@ const DeviceIcon = ({ model }) => {
 	return <LightbulbIcon />;
 };
 
-const DevicesList = ({ devices, deleteDevice }) => {
+const DevicesList = () => {
+	const { devices, deleteDevice } = useContext(Context);
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [selectedLocation, setSelectedLocation] = useState(null);
 	const open = Boolean(anchorEl);

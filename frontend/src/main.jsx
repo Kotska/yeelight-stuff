@@ -7,6 +7,7 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import { StyledEngineProvider } from "@mui/material/styles";
 import MyThemeProvider from "./theme/MyThemeProvider";
+import Store from "./Store";
 
 const container = document.getElementById("root");
 
@@ -17,7 +18,9 @@ root.render(
 		<BrowserRouter>
 			<StyledEngineProvider injectFirst>
 				<MyThemeProvider>
-					<App />
+					<Store>
+						<App />
+					</Store>
 				</MyThemeProvider>
 			</StyledEngineProvider>
 		</BrowserRouter>
