@@ -14,6 +14,10 @@ export function GetDevices() {
   return window['go']['main']['App']['GetDevices']();
 }
 
+export function GetIsPlaying() {
+  return window['go']['main']['App']['GetIsPlaying']();
+}
+
 export function NewBasicDevice(arg1, arg2) {
   return window['go']['main']['App']['NewBasicDevice'](arg1, arg2);
 }

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Kotska/yeelight-stuff/pkg/mediadetector"
 	"github.com/fatih/color"
 	"github.com/oherych/yeelight"
 )
@@ -19,6 +20,7 @@ import (
 type App struct {
 	ctx           context.Context
 	Configuration Configuration
+	isPlaying     bool
 }
 
 type Device struct {
@@ -45,6 +47,7 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.setupConfig()
+	mediadetector.DetectMedia(a.ctx, &a.isPlaying)
 }
 
 func (a *App) setupConfig() {
@@ -176,4 +179,8 @@ func (a *App) DiscoverBulbs() bool {
 	}
 
 	return true
+}
+
+func (a *App) GetIsPlaying() bool {
+	return a.isPlaying
 }

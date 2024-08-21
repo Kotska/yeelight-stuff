@@ -3,6 +3,7 @@ import {
 	GetDevices,
 	NewBasicDevice,
 	DeleteDevice,
+	GetIsPlaying,
 } from "../wailsjs/go/main/App.js";
 
 export const Context = createContext();
@@ -32,6 +33,12 @@ const Store = ({ children }) => {
 
 	useEffect(() => {
 		getDevices();
+
+		setInterval(() => {
+			GetIsPlaying().then((result) => {
+				console.log("Is playing: " + result);
+			});
+		}, 1000);
 	}, []);
 
 	return (
